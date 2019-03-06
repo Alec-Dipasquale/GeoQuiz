@@ -31,7 +31,11 @@ public class MainActivity extends AppCompatActivity {
             new Question(R.string.question_asia, true)
     };
 
+    private boolean mIsQuestionAnswerRight[];
+    private boolean mIsQuestionAnswered[];
+
     private int mCurrentIndex = 0;
+    private int mCountAnswered = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,18 +91,56 @@ public class MainActivity extends AppCompatActivity {
         updateQuestion();
     }
 
+    private void updateQuestion(){
+        int question = mQuestionBank[mCurrentIndex].getTextResId();
+        mQuestionTextView.setText(question);
+        if(mIsQuestionAnswered[mCurrentIndex] == false){
+            mTrueButton.setEnabled(true);
+            mFalseButton.setEnabled(true);
+        } else{
+            mTrueButton.setEnabled(false);
+            mFalseButton.setEnabled(false);
+        }
+    }
+
+    private void checkAnswer(boolean userPressedTrue){
+        boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+        mIsQuestionAnswered[mCurrentIndex] = true;
+        mCountAnswered++;
+
+        int messageResId = 0;
+
+        if(userPressedTrue == answerIsTrue) {
+            mIsQuestionAnswerRight[mCurrentIndex] = true;
+            messageResId = R.string.correct_toast;
+        }else{
+            mIsQuestionAnswerRight[mCurrentIndex] = false;
+            messageResId = R.string.incorrect_toast;
+        }
+        mTrueButton.setEnabled(false);
+        mFalseButton.setEnabled(false);
+        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+
+        if(mCountAnswered == mQuestionBank.length){
+            Toast.makeText(this, showPercent()+ "% is your final score!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private int showPercent() {
+        
+    }
+
+
     @Override
     public void onStart(){
         super.onStart();
         Log.d(TAG, "onStart() called");
     }
-
     @Override
     public void onResume(){
         super.onResume();
         Log.d(TAG, "onResume() called");
     }
-
     @Override
     public void onPause(){
         super.onPause();
@@ -110,35 +152,14 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
     }
-
     @Override
     public void onStop(){
         super.onStop();
         Log.d(TAG, "onStop() called");
     }
-
     @Override
     public void onDestroy(){
         super.onDestroy();
         Log.d(TAG, "onDestroy called");
     }
-
-    private void updateQuestion(){
-        int question = mQuestionBank[mCurrentIndex].getTextResId();
-        mQuestionTextView.setText(question);
-    }
-
-    private void checkAnswer(boolean userPressedTrue){
-        boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-
-        int messageResId = 0;
-
-        if(userPressedTrue == answerIsTrue) {
-            messageResId = R.string.correct_toast;
-        }else{
-            messageResId = R.string.incorrect_toast;
-        }
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
-    }
-
 }
