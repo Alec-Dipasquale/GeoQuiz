@@ -31,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
             new Question(R.string.question_asia, true)
     };
 
-    private boolean mIsQuestionAnswerRight[];
-    private boolean mIsQuestionAnswered[];
+    private boolean mIsQuestionAnswerRight[] = new boolean[mQuestionBank.length];
+    private boolean mIsQuestionAnswered[] = new boolean[mQuestionBank.length];
 
     private int mCurrentIndex = 0;
     private int mCountAnswered = 0;
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateQuestion(){
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
-        if(mIsQuestionAnswered[mCurrentIndex] == false){
+        if(!mIsQuestionAnswered[mCurrentIndex]){
             mTrueButton.setEnabled(true);
             mFalseButton.setEnabled(true);
         } else{
@@ -127,7 +127,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int showPercent() {
-        
+        int rightAnswers = 0;
+        int totalQuestions = mQuestionBank.length;
+        int percentRight;
+        boolean isAnswerTrue;
+        for(int i = 0; i<totalQuestions; i++){
+            isAnswerTrue = mIsQuestionAnswerRight[i];
+            if(isAnswerTrue) {
+                rightAnswers++;
+                Log.d(TAG, "in if(isAnswerTrue)");
+            }
+        }
+        percentRight = (rightAnswers*100/totalQuestions);
+        return percentRight;
     }
 
 
