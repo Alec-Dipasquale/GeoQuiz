@@ -26,7 +26,7 @@
                     android:host="cheat"/>
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".QuizActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

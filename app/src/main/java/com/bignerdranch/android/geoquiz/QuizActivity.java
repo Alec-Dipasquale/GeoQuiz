@@ -1,23 +1,26 @@
 package com.bignerdranch.android.geoquiz;
 
-import android.media.Image;
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class QuizActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final String KEY_CHEAT = "cheat";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mCheatButton;
     private ImageButton mNextButton;
     private ImageButton mPrevButton;
     private TextView mQuestionTextView;
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int mCurrentIndex = 0;
     private int mCountAnswered = 0;
+    private boolean mIsCheater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +81,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                mIsCheater = false;
                 updateQuestion();
             }
         });
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //start CheatActivity
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                startActivityForResult(intent, REQUEST_CODE_CHEAT);
+            }
+        });
+        updateQuestion();
         mPrevButton = (ImageButton) findViewById(R.id.prev_button);
         mPrevButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -89,6 +105,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         updateQuestion();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+        if (requestCode == REQUEST_CODE_CHEAT) {
+            if (data == null) {
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
     }
 
     private void updateQuestion(){
@@ -110,12 +139,16 @@ public class MainActivity extends AppCompatActivity {
 
         int messageResId = 0;
 
-        if(userPressedTrue == answerIsTrue) {
-            mIsQuestionAnswerRight[mCurrentIndex] = true;
-            messageResId = R.string.correct_toast;
-        }else{
-            mIsQuestionAnswerRight[mCurrentIndex] = false;
-            messageResId = R.string.incorrect_toast;
+        if(mIsCheater){
+            messageResId = R.string.judgement_toast;
+        } else {
+            if (userPressedTrue == answerIsTrue) {
+                mIsQuestionAnswerRight[mCurrentIndex] = true;
+                messageResId = R.string.correct_toast;
+            } else {
+                mIsQuestionAnswerRight[mCurrentIndex] = false;
+                messageResId = R.string.incorrect_toast;
+            }
         }
         mTrueButton.setEnabled(false);
         mFalseButton.setEnabled(false);
@@ -163,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putBoolean(KEY_CHEAT, mIsCheater);
     }
     @Override
     public void onStop(){
